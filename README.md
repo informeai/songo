@@ -75,3 +75,7 @@ import (
 samples := presets.Coin()
 synth.WriteWAV("coin.wav", samples)
 ```
+
+## Licença
+
+MIT — veja [LICENSE](LICENSE).
