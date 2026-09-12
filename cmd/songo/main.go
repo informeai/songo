@@ -60,6 +60,20 @@ semicolcheia, "." opcional pra ponteada). Exemplo:
   A4 e
   C5 e
 
+Instrumento customizado: um bloco "instrument <nome> ... end" define um
+timbre com a mesma sintaxe do .sfx (gerador + processadores), usando os
+placeholders {freq}, {dur} e {amp} — substituídos pelos valores de cada
+nota tocada por uma voice que use esse instrumento:
+
+  instrument gritty_lead
+  square {freq} {dur} duty=0.25 amp={amp}
+  resonant 1200 8
+  distortion 3
+  end
+
+  voice lead gritty_lead
+  A4 e
+
 Veja examples/*.song.
 
 transcribe: detecta pitch por autocorrelação numa melodia monofônica (um

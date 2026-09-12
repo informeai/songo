@@ -189,6 +189,38 @@ Instrumentos disponíveis pra `voice`: `square` (flag `duty`), `triangle`,
 é normalizado automaticamente (headroom de 0.9) pra não estourar quando
 várias vozes tocam ao mesmo tempo.
 
+### Instrumentos customizados: usando o `.sfx` dentro do `.song`
+
+Os instrumentos embutidos acima são só um oscilador cru. Pra usar
+filtros e efeitos (os processadores do `.sfx` — `resonant`, `distortion`,
+`reverb`, `bitcrush`, etc.) numa voice, defina um instrumento customizado
+com um bloco `instrument <nome> ... end`, usando exatamente a mesma
+sintaxe de gerador+processadores do `.sfx`, com os placeholders `{freq}`,
+`{dur}` e `{amp}` na primeira linha — eles são substituídos pelos valores
+de cada nota tocada por uma voice que use esse instrumento:
+
+```
+instrument gritty_lead
+square {freq} {dur} duty=0.25 amp={amp}
+resonant 1200 8
+distortion 3
+envelope 0.005 0.02 0.7 0.05
+end
+
+voice lead gritty_lead
+A3 q
+C4 q
+E4 q
+A4 h
+```
+
+O bloco `instrument` precisa vir antes da `voice` que o usa, só pode
+conter linhas de processamento do `.sfx` (nada de `voice`/`tempo`/
+`repeat` dentro dele) e, ao contrário dos instrumentos embutidos, não
+aplica nenhum envelope automático — se não colocar um `envelope` no
+bloco, pode ouvir cliques entre notas, igual aconteceria num `.sfx`.
+Veja [`examples/custom_instrument.song`](examples/custom_instrument.song).
+
 ### Repetindo trechos com `repeat`/`end`
 
 Pra trilhas mais longas, em vez de reescrever o mesmo trecho de notas

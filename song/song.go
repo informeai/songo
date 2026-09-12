@@ -12,6 +12,21 @@
 //	voice lead square duty=0.25
 //	A4 e
 //	C5 e
+//
+// Instrumentos customizados: um bloco "instrument <nome> ... end" define
+// um timbre com a mesma sintaxe do package script (gerador + processadores
+// como filtros/efeitos), usando os placeholders {freq}, {dur} e {amp} na
+// primeira linha (o gerador) — eles são substituídos pelos valores de
+// cada nota tocada por uma voice que referencie esse instrumento:
+//
+//	instrument gritty_lead
+//	square {freq} {dur} duty=0.25 amp={amp}
+//	resonant 1200 8
+//	distortion 3
+//	end
+//
+//	voice lead gritty_lead
+//	A4 e
 package song
 
 import (
@@ -22,15 +37,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/informeai/songo/script"
 	"github.com/informeai/songo/synth"
 )
 
 var noteIndex = map[byte]int{'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
 
 type voice struct {
-	gen     string
-	params  map[string]string
-	samples []float64
+	gen        string
+	params     map[string]string
+	samples    []float64
+	customTmpl []string // linhas do instrumento customizado, se houver (senão nil)
 }
 
 // Run interpreta um arquivo .song e retorna as amostras de todas as vozes
@@ -39,11 +56,17 @@ func Run(r io.Reader) ([]float64, error) {
 	bpm := 120.0
 	var voices []*voice
 	var current *voice
+	instruments := map[string][]string{}
 
 	inRepeat := false
 	repeatCount := 0
 	repeatStartLine := 0
 	var repeatBuffer [][]string
+
+	inInstrument := false
+	instrumentName := ""
+	instrumentStartLine := 0
+	var instrumentBuffer []string
 
 	scanner := bufio.NewScanner(r)
 	lineNo := 0
@@ -55,6 +78,20 @@ func Run(r io.Reader) ([]float64, error) {
 		}
 		fields := strings.Fields(line)
 
+		if inInstrument {
+			if fields[0] == "end" {
+				instruments[instrumentName] = instrumentBuffer
+				inInstrument = false
+				instrumentBuffer = nil
+				continue
+			}
+			if fields[0] == "instrument" || fields[0] == "voice" || fields[0] == "tempo" || fields[0] == "repeat" {
+				return nil, fmt.Errorf("linha %d: %q não é permitido dentro de um bloco instrument", lineNo, fields[0])
+			}
+			instrumentBuffer = append(instrumentBuffer, line)
+			continue
+		}
+
 		if inRepeat {
 			if fields[0] == "end" {
 				if err := runRepeat(current, repeatBuffer, repeatCount, bpm); err != nil {
@@ -64,7 +101,7 @@ func Run(r io.Reader) ([]float64, error) {
 				repeatBuffer = nil
 				continue
 			}
-			if fields[0] == "repeat" || fields[0] == "voice" || fields[0] == "tempo" {
+			if fields[0] == "repeat" || fields[0] == "voice" || fields[0] == "tempo" || fields[0] == "instrument" {
 				return nil, fmt.Errorf("linha %d: %q não é permitido dentro de um bloco repeat", lineNo, fields[0])
 			}
 			repeatBuffer = append(repeatBuffer, fields)
@@ -79,8 +116,17 @@ func Run(r io.Reader) ([]float64, error) {
 			}
 			bpm = v
 
+		case "instrument":
+			if len(fields) != 2 {
+				return nil, fmt.Errorf("linha %d: uso: instrument <nome>", lineNo)
+			}
+			inInstrument = true
+			instrumentName = fields[1]
+			instrumentStartLine = lineNo
+			instrumentBuffer = nil
+
 		case "voice":
-			v, err := parseVoice(fields)
+			v, err := parseVoice(fields, instruments)
 			if err != nil {
 				return nil, fmt.Errorf("linha %d: %w", lineNo, err)
 			}
@@ -101,7 +147,7 @@ func Run(r io.Reader) ([]float64, error) {
 			repeatBuffer = nil
 
 		case "end":
-			return nil, fmt.Errorf("linha %d: 'end' sem 'repeat' correspondente", lineNo)
+			return nil, fmt.Errorf("linha %d: 'end' sem 'repeat'/'instrument' correspondente", lineNo)
 
 		default:
 			if current == nil {
@@ -111,6 +157,9 @@ func Run(r io.Reader) ([]float64, error) {
 				return nil, fmt.Errorf("linha %d: %w", lineNo, err)
 			}
 		}
+	}
+	if inInstrument {
+		return nil, fmt.Errorf("linha %d: 'instrument' sem 'end' correspondente", instrumentStartLine)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
@@ -167,7 +216,7 @@ func runRepeat(v *voice, buffered [][]string, count int, bpm float64) error {
 	return nil
 }
 
-func parseVoice(fields []string) (*voice, error) {
+func parseVoice(fields []string, instruments map[string][]string) (*voice, error) {
 	if len(fields) < 3 {
 		return nil, fmt.Errorf("uso: voice <nome> <instrumento> [param=valor ...]")
 	}
@@ -179,7 +228,8 @@ func parseVoice(fields []string) (*voice, error) {
 		}
 		params[key] = val
 	}
-	return &voice{gen: fields[2], params: params}, nil
+	gen := fields[2]
+	return &voice{gen: gen, params: params, customTmpl: instruments[gen]}, nil
 }
 
 func appendNote(v *voice, fields []string, bpm float64) error {
@@ -212,14 +262,23 @@ func appendNote(v *voice, fields []string, bpm float64) error {
 		return nil
 	}
 
+	// "x" marca uma pancada sem altura definida (percussão, tanto nos
+	// instrumentos embutidos quanto nos customizados); qualquer outro
+	// token é interpretado como nota musical.
 	var freq float64
-	if v.gen != "noise" {
+	if noteStr != "x" {
 		freq, err = noteToFreq(noteStr)
 		if err != nil {
 			return err
 		}
 	}
-	samples, err := renderNote(v.gen, v.params, freq, duration, amp)
+
+	var samples []float64
+	if v.customTmpl != nil {
+		samples, err = renderCustomNote(v.customTmpl, freq, duration, amp)
+	} else {
+		samples, err = renderNote(v.gen, v.params, freq, duration, amp)
+	}
 	if err != nil {
 		return err
 	}
@@ -283,6 +342,32 @@ func noteToFreq(note string) (float64, error) {
 	}
 	midi := (octave+1)*12 + base
 	return 440 * math.Pow(2, float64(midi-69)/12), nil
+}
+
+// renderCustomNote toca uma nota usando um instrumento customizado
+// (bloco "instrument ... end"): substitui {freq}/{dur}/{amp} em cada
+// linha do template e executa a mesma sequência gerador+processadores
+// que o package script usa pra arquivos .sfx.
+func renderCustomNote(template []string, freq, duration, amp float64) ([]float64, error) {
+	var buf []float64
+	for _, line := range template {
+		line = substitutePlaceholders(line, freq, duration, amp)
+		var err error
+		buf, err = script.ExecLine(buf, line)
+		if err != nil {
+			return nil, fmt.Errorf("instrumento customizado: %w", err)
+		}
+	}
+	return buf, nil
+}
+
+func substitutePlaceholders(line string, freq, duration, amp float64) string {
+	r := strings.NewReplacer(
+		"{freq}", strconv.FormatFloat(freq, 'f', 4, 64),
+		"{dur}", strconv.FormatFloat(duration, 'f', 6, 64),
+		"{amp}", strconv.FormatFloat(amp, 'f', 4, 64),
+	)
+	return r.Replace(line)
 }
 
 func renderNote(gen string, params map[string]string, freq, duration, amp float64) ([]float64, error) {

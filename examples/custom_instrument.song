@@ -1,0 +1,22 @@
+# demonstra um instrumento customizado: combina gerador + processadores
+# do package script (mesma sintaxe do .sfx) dentro de um bloco "instrument"
+tempo 130
+
+instrument gritty_lead
+square {freq} {dur} duty=0.25 amp={amp}
+resonant 1200 8
+distortion 3
+envelope 0.005 0.02 0.7 0.05
+end
+
+voice lead gritty_lead
+A3 q
+C4 q
+E4 q
+A4 h
+
+voice bass triangle amp=0.5
+A2 q
+A2 q
+A2 q
+A2 h

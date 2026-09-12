@@ -31,7 +31,7 @@ func Run(r io.Reader) ([]float64, error) {
 			continue
 		}
 		var err error
-		buf, err = execLine(buf, line)
+		buf, err = ExecLine(buf, line)
 		if err != nil {
 			return nil, fmt.Errorf("linha %d: %w", lineNo, err)
 		}
@@ -42,7 +42,12 @@ func Run(r io.Reader) ([]float64, error) {
 	return buf, nil
 }
 
-func execLine(buf []float64, line string) ([]float64, error) {
+// ExecLine executa uma única instrução da DSL sobre o buffer acumulado
+// até ali (um gerador concatena, um processador transforma o buffer
+// inteiro) e retorna o buffer resultante. Exportada pra ser reaproveitada
+// por outros interpretadores da DSL, como as definições de instrumento
+// customizado do package song.
+func ExecLine(buf []float64, line string) ([]float64, error) {
 	fields := strings.Fields(line)
 	cmd := fields[0]
 	pos, kv, err := splitArgs(fields[1:])
