@@ -40,6 +40,11 @@ func Run(r io.Reader) ([]float64, error) {
 	var voices []*voice
 	var current *voice
 
+	inRepeat := false
+	repeatCount := 0
+	repeatStartLine := 0
+	var repeatBuffer [][]string
+
 	scanner := bufio.NewScanner(r)
 	lineNo := 0
 	for scanner.Scan() {
@@ -49,6 +54,22 @@ func Run(r io.Reader) ([]float64, error) {
 			continue
 		}
 		fields := strings.Fields(line)
+
+		if inRepeat {
+			if fields[0] == "end" {
+				if err := runRepeat(current, repeatBuffer, repeatCount, bpm); err != nil {
+					return nil, fmt.Errorf("linha %d: %w", lineNo, err)
+				}
+				inRepeat = false
+				repeatBuffer = nil
+				continue
+			}
+			if fields[0] == "repeat" || fields[0] == "voice" || fields[0] == "tempo" {
+				return nil, fmt.Errorf("linha %d: %q não é permitido dentro de um bloco repeat", lineNo, fields[0])
+			}
+			repeatBuffer = append(repeatBuffer, fields)
+			continue
+		}
 
 		switch fields[0] {
 		case "tempo":
@@ -66,6 +87,22 @@ func Run(r io.Reader) ([]float64, error) {
 			current = v
 			voices = append(voices, current)
 
+		case "repeat":
+			if current == nil {
+				return nil, fmt.Errorf("linha %d: repeat fora de uma voice", lineNo)
+			}
+			n, err := parseRepeatCount(fields)
+			if err != nil {
+				return nil, fmt.Errorf("linha %d: %w", lineNo, err)
+			}
+			inRepeat = true
+			repeatCount = n
+			repeatStartLine = lineNo
+			repeatBuffer = nil
+
+		case "end":
+			return nil, fmt.Errorf("linha %d: 'end' sem 'repeat' correspondente", lineNo)
+
 		default:
 			if current == nil {
 				return nil, fmt.Errorf("linha %d: nota fora de uma voice (declare 'voice <nome> <instrumento>' antes)", lineNo)
@@ -77,6 +114,9 @@ func Run(r io.Reader) ([]float64, error) {
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
+	}
+	if inRepeat {
+		return nil, fmt.Errorf("linha %d: 'repeat' sem 'end' correspondente", repeatStartLine)
 	}
 
 	all := make([][]float64, len(voices))
@@ -98,6 +138,33 @@ func parseTempo(fields []string) (float64, error) {
 		return 0, fmt.Errorf("bpm inválido: %q", fields[1])
 	}
 	return v, nil
+}
+
+func parseRepeatCount(fields []string) (int, error) {
+	if len(fields) != 2 {
+		return 0, fmt.Errorf("uso: repeat <vezes>")
+	}
+	n, err := strconv.Atoi(fields[1])
+	if err != nil || n < 1 {
+		return 0, fmt.Errorf("número de repetições inválido: %q", fields[1])
+	}
+	return n, nil
+}
+
+// runRepeat reexecuta as linhas de nota bufferizadas dentro de um bloco
+// repeat/end, count vezes, na voz atual.
+func runRepeat(v *voice, buffered [][]string, count int, bpm float64) error {
+	if v == nil {
+		return fmt.Errorf("repeat fora de uma voice")
+	}
+	for range count {
+		for _, fields := range buffered {
+			if err := appendNote(v, fields, bpm); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func parseVoice(fields []string) (*voice, error) {

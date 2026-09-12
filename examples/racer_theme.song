@@ -80,54 +80,14 @@ D4 e
 
 voice kick noise amp=0.6
 # um "boom" nos tempos 1 e 3 de cada compasso, repetido nos 4 compassos
+repeat 8
 x q
 . q
-x q
-. q
-x q
-. q
-x q
-. q
-x q
-. q
-x q
-. q
-x q
-. q
-x q
-. q
+end
 
 voice hihat noise amp=0.15
 # hihat na contratempo (offbeat) das colcheias, repetido nos 4 compassos
+repeat 16
 . e
 x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
-. e
-x e
+end

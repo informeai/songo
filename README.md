@@ -179,6 +179,24 @@ Instrumentos disponíveis pra `voice`: `square` (flag `duty`), `triangle`,
 é normalizado automaticamente (headroom de 0.9) pra não estourar quando
 várias vozes tocam ao mesmo tempo.
 
+### Repetindo trechos com `repeat`/`end`
+
+Pra trilhas mais longas, em vez de reescrever o mesmo trecho de notas
+várias vezes, envolva-o num bloco `repeat <vezes>` / `end` dentro da
+`voice`:
+
+```
+voice hihat noise amp=0.15
+repeat 16
+. e
+x e
+end
+```
+
+Isso equivale a escrever `. e` / `x e` sozinhos 16 vezes seguidas. Blocos
+`repeat` não podem ser aninhados nem conter `voice`/`tempo`/outro `repeat`
+— só linhas de nota.
+
 > Por que uma DSL de composição em vez de recriar trilhas de jogos
 > existentes: transcrever nota por nota a trilha de um jogo específico
 > reproduziria uma composição protegida por direitos autorais. O songo
