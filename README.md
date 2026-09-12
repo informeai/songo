@@ -29,11 +29,18 @@ songo generate coin
 # gera um preset com nome de arquivo customizado
 songo generate laser -o meu_laser.wav
 
+# gera e já toca o som (afplay no macOS, paplay/aplay/ffplay no Linux,
+# PowerShell no Windows)
+songo generate powerup -p
+
 # gera todos os presets de uma vez (salva em ./sounds/ por padrão)
 songo all
 
 # gera todos os presets numa pasta customizada
 songo all -o assets/sfx
+
+# gera todos e toca cada um em sequência, útil pra navegar pelos sons
+songo all -p
 ```
 
 ## Presets disponíveis
