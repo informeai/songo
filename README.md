@@ -47,6 +47,9 @@ songo run examples/coin.sfx -p
 
 # gera uma composição com múltiplas vozes (veja a seção "Composição")
 songo song examples/racer_theme.song -p
+
+# transcreve uma melodia monofônica de um WAV pra um .song (veja abaixo)
+songo transcribe melodia.wav -tempo 120
 ```
 
 ## Presets disponíveis
@@ -207,17 +210,52 @@ Isso equivale a escrever `. e` / `x e` sozinhos 16 vezes seguidas. Blocos
 > te dá as ferramentas (sequenciador + instrumentos 8-bit) pra compor
 > algo original no mesmo estilo.
 
+### Transcrevendo uma melodia de um WAV com `songo transcribe`
+
+Além de compor manualmente, dá pra gerar um `.song` automaticamente a
+partir de áudio: `songo transcribe` detecta a altura (pitch) por
+autocorrelação e converte pra uma sequência de notas.
+
+```sh
+songo transcribe entrada.wav -o melodia.song -tempo 120 -instrument square -voice lead
+```
+
+| Flag           | Padrão    | Descrição                                                |
+|----------------|-----------|-----------------------------------------------------------|
+| `-o`           | `<entrada>.song` | Caminho do `.song` gerado                          |
+| `-tempo`       | `120`     | BPM assumido pra quantizar as durações detectadas em w/h/q/e/s |
+| `-instrument`  | `square`  | Instrumento usado na voice gerada                          |
+| `-voice`       | `melody`  | Nome da voice gerada                                       |
+
+**Limitações importantes:**
+- Só aceita **WAV mono, 16-bit, 44100Hz** (sem decodificador de MP3
+  embutido, pra manter o projeto sem dependências externas). Converta
+  com `ffmpeg -i entrada.mp3 -ac 1 -ar 44100 -sample_fmt s16 entrada.wav`.
+- Detecta **uma melodia monofônica** (uma nota de cada vez — um
+  instrumento solo, um assobio, um canto). Não separa uma faixa com
+  vários instrumentos tocando ao mesmo tempo (baixo+bateria+lead juntos)
+  em vozes diferentes — isso é um problema de pesquisa (separação de
+  fontes polifônica) que a implementação atual não resolve.
+- As durações são quantizadas pro BPM informado; se o BPM real do áudio
+  for diferente do passado em `-tempo`, os valores de w/h/q/e/s podem
+  sair um pouco "torcidos" (funciona, mas talvez precise de ajuste manual
+  no `.song` gerado).
+
+Validado com um roundtrip: uma escala sintetizada com `songo song` foi
+transcrita de volta e recuperou as notas exatamente.
+
 ## Estrutura do projeto
 
 ```
 songo/
-├── synth/     # motor de síntese reutilizável (ondas, envelope ADSR,
-│              # filtros, delay, bitcrush, FM, escrita de WAV)
-├── presets/   # receitas prontas de efeitos sonoros em cima do synth
-├── script/    # interpretador da DSL declarativa de efeitos (.sfx)
-├── song/      # interpretador da DSL de composição multi-voz (.song)
-├── examples/  # scripts .sfx e .song de exemplo
-└── cmd/songo/ # CLI
+├── synth/      # motor de síntese reutilizável (ondas, envelope ADSR,
+│               # filtros, delay, bitcrush, FM, leitura/escrita de WAV)
+├── presets/    # receitas prontas de efeitos sonoros em cima do synth
+├── script/     # interpretador da DSL declarativa de efeitos (.sfx)
+├── song/       # interpretador da DSL de composição multi-voz (.song)
+├── transcribe/ # detecção de pitch (WAV -> .song de uma voz)
+├── examples/   # scripts .sfx e .song de exemplo
+└── cmd/songo/  # CLI
 ```
 
 ## Usando como biblioteca

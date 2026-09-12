@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/informeai/songo/presets"
 	"github.com/informeai/songo/script"
 	"github.com/informeai/songo/song"
 	"github.com/informeai/songo/synth"
+	"github.com/informeai/songo/transcribe"
 )
 
 func usage() {
@@ -23,6 +25,7 @@ Uso:
   songo all [-o dir] [-p]                gera todos os presets (padrão: ./sounds)
   songo run <script.sfx> [-o arq] [-p]   interpreta um script da DSL do songo
   songo song <musica.song> [-o arq] [-p] interpreta uma composição com múltiplas vozes
+  songo transcribe <entrada.wav> [flags] detecta a melodia monofônica e gera um .song
 
 Flags:
   -o <caminho>   caminho de saída (arquivo em generate/run, diretório em all)
@@ -57,7 +60,15 @@ semicolcheia, "." opcional pra ponteada). Exemplo:
   A4 e
   C5 e
 
-Veja examples/*.song.`)
+Veja examples/*.song.
+
+transcribe: detecta pitch por autocorrelação numa melodia monofônica (um
+instrumento/voz de cada vez — não separa faixas com vários instrumentos
+tocando juntos) e gera uma voice .song com as notas encontradas. Aceita
+apenas WAV mono 16-bit 44100Hz (converta com ffmpeg -ac 1 -ar 44100
+-sample_fmt s16). Flags: -o <saida.song>, -tempo <bpm, padrão 120>,
+-instrument <square|triangle|sine|sawtooth|pluck|fm, padrão square>,
+-voice <nome, padrão melody>.`)
 }
 
 // parseFlags extrai "-o <valor>" e "-p"/"--play" de uma lista de argumentos,
@@ -73,6 +84,42 @@ func parseFlags(args []string, defaultOut string) (out string, play bool) {
 			}
 		case "-p", "--play":
 			play = true
+		}
+	}
+	return
+}
+
+// parseTranscribeFlags extrai -o, -tempo, -instrument e -voice, em
+// qualquer ordem, com valores padrão.
+func parseTranscribeFlags(args []string, defaultOut string) (out string, bpm float64, instrument, voiceName string) {
+	out = defaultOut
+	bpm = 120
+	instrument = "square"
+	voiceName = "melody"
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "-o":
+			if i+1 < len(args) {
+				out = args[i+1]
+				i++
+			}
+		case "-tempo":
+			if i+1 < len(args) {
+				if v, err := strconv.ParseFloat(args[i+1], 64); err == nil {
+					bpm = v
+				}
+				i++
+			}
+		case "-instrument":
+			if i+1 < len(args) {
+				instrument = args[i+1]
+				i++
+			}
+		case "-voice":
+			if i+1 < len(args) {
+				voiceName = args[i+1]
+				i++
+			}
 		}
 	}
 	return
@@ -197,6 +244,28 @@ func main() {
 		if play {
 			playOrWarn(out)
 		}
+
+	case "transcribe":
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "uso: songo transcribe <entrada.wav> [-o saida.song] [-tempo 120] [-instrument square] [-voice melody]")
+			os.Exit(1)
+		}
+		inPath := os.Args[2]
+		defaultOut := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath)) + ".song"
+		out, bpm, instrument, voiceName := parseTranscribeFlags(os.Args[3:], defaultOut)
+
+		samples, err := synth.ReadWAV(inPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao ler wav:", err)
+			os.Exit(1)
+		}
+		events := transcribe.FromSamples(samples)
+		text := transcribe.ToSongText(events, bpm, voiceName, instrument)
+		if err := os.WriteFile(out, []byte(text), 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao gravar .song:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("gerado: %s (%d notas/pausas detectadas)\n", out, len(events))
 
 	default:
 		usage()
