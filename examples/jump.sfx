@@ -1,0 +1,3 @@
+# pulo: sweep de frequência subindo rápido
+sweep 200 800 0.15 duty=0.5 amp=0.4
+envelope 0.001 0.05 0.3 0.05

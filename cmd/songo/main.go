@@ -6,8 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/informeai/songo/presets"
+	"github.com/informeai/songo/script"
 	"github.com/informeai/songo/synth"
 )
 
@@ -18,10 +20,22 @@ Uso:
   songo list                             lista os presets disponíveis
   songo generate <preset> [-o arq] [-p]  gera um preset (padrão: <preset>.wav)
   songo all [-o dir] [-p]                gera todos os presets (padrão: ./sounds)
+  songo run <script.sfx> [-o arq] [-p]   interpreta um script da DSL do songo
 
 Flags:
-  -o <caminho>   caminho de saída (arquivo em generate, diretório em all)
-  -p, --play     toca cada som logo após gerá-lo`)
+  -o <caminho>   caminho de saída (arquivo em generate/run, diretório em all)
+  -p, --play     toca cada som logo após gerá-lo
+
+DSL (arquivos .sfx): uma instrução por linha. Geradores (square, triangle,
+noise, sweep, fm) concatenam trechos de áudio; processadores (envelope,
+lowpass, sweep_filter, delay, bitcrush) transformam o áudio já gerado.
+Exemplo:
+
+  square 988 0.05 duty=0.5 amp=0.4
+  square 1319 0.15 duty=0.5 amp=0.4
+  envelope 0.001 0.02 0.6 0.05
+
+Veja mais exemplos em examples/*.sfx.`)
 }
 
 // parseFlags extrai "-o <valor>" e "-p"/"--play" de uma lista de argumentos,
@@ -102,6 +116,35 @@ func main() {
 			if play {
 				playOrWarn(out)
 			}
+		}
+
+	case "run":
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "uso: songo run <script.sfx> [-o arquivo.wav] [-p]")
+			os.Exit(1)
+		}
+		scriptPath := os.Args[2]
+		defaultOut := strings.TrimSuffix(filepath.Base(scriptPath), filepath.Ext(scriptPath)) + ".wav"
+		out, play := parseFlags(os.Args[3:], defaultOut)
+
+		f, err := os.Open(scriptPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao abrir script:", err)
+			os.Exit(1)
+		}
+		samples, err := script.Run(f)
+		f.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "erro no script:", err)
+			os.Exit(1)
+		}
+		if err := synth.WriteWAV(out, samples); err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao gerar som:", err)
+			os.Exit(1)
+		}
+		fmt.Println("gerado:", out)
+		if play {
+			playOrWarn(out)
 		}
 
 	default:

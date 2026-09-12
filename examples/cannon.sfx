@@ -1,0 +1,5 @@
+# canhão: ruído + filtro fechando ao longo do tempo + eco
+noise 0.5 amp=0.8
+sweep_filter 4000 100
+envelope 0.001 0.05 0.4 0.3
+delay 0.08 0.4 3
