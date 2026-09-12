@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"songo/presets"
-	"songo/synth"
+	"github.com/informeai/songo/presets"
+	"github.com/informeai/songo/synth"
 )
 
 func usage() {

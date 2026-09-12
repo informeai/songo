@@ -68,8 +68,8 @@ projeto Go para gerar sons em tempo de build ou em runtime:
 
 ```go
 import (
-    "songo/presets"
-    "songo/synth"
+    "github.com/informeai/songo/presets"
+    "github.com/informeai/songo/synth"
 )
 
 samples := presets.Coin()

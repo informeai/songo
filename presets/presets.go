@@ -2,7 +2,7 @@
 // construídas em cima do pacote synth.
 package presets
 
-import "songo/synth"
+import "github.com/informeai/songo/synth"
 
 // Preset gera as amostras de um efeito sonoro.
 type Preset func() []float64
