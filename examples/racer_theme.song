@@ -1,9 +1,13 @@
-# tema original de corrida 8-bit (composição própria, não é trilha de
-# nenhum jogo existente): progressão Am - F - C - G a 150 BPM
+# tema original de corrida 8-bit (composição própria) a 150 BPM.
+# estrutura: intro -> tema A (2x) -> ponte -> tema A (reprise) -> outro
 tempo 150
 
 voice bass triangle amp=0.6
-# Am
+# --- Intro: só o baixo, construindo tensão ---
+A2 w
+F2 w
+# --- Tema A (Am-F-C-G), toca 2x ---
+repeat 2
 A2 e
 E3 e
 A2 e
@@ -12,7 +16,6 @@ A2 e
 E3 e
 A2 e
 E3 e
-# F
 F2 e
 C3 e
 F2 e
@@ -21,7 +24,6 @@ F2 e
 C3 e
 F2 e
 C3 e
-# C
 C3 e
 G3 e
 C3 e
@@ -30,7 +32,6 @@ C3 e
 G3 e
 C3 e
 G3 e
-# G
 G2 e
 D3 e
 G2 e
@@ -39,9 +40,68 @@ G2 e
 D3 e
 G2 e
 D3 e
+end
+# --- Ponte (Dm-Em-F-G), ritmo mais espaçado ---
+D3 q
+A3 q
+D3 q
+A3 q
+E3 q
+B3 q
+E3 q
+B3 q
+F2 q
+C3 q
+F2 q
+C3 q
+G2 q
+D3 q
+G2 q
+D3 q
+# --- Tema A (reprise) ---
+A2 e
+E3 e
+A2 e
+E3 e
+A2 e
+E3 e
+A2 e
+E3 e
+F2 e
+C3 e
+F2 e
+C3 e
+F2 e
+C3 e
+F2 e
+C3 e
+C3 e
+G3 e
+C3 e
+G3 e
+C3 e
+G3 e
+C3 e
+G3 e
+G2 e
+D3 e
+G2 e
+D3 e
+G2 e
+D3 e
+G2 e
+D3 e
+# --- Outro: resolução final ---
+A2 h
+E3 h
+A2 w
 
 voice lead square duty=0.25 amp=0.3
-# Am
+# --- Intro: silêncio, só o baixo constrói tensão ---
+. w
+. w
+# --- Tema A, toca 2x ---
+repeat 2
 A4 e
 C5 e
 E5 e
@@ -50,7 +110,6 @@ E5 e
 C5 e
 A4 e
 E4 e
-# F
 F4 e
 A4 e
 C5 e
@@ -59,7 +118,6 @@ C5 e
 A4 e
 F4 e
 C4 e
-# C
 C4 e
 E4 e
 G4 e
@@ -68,7 +126,6 @@ G4 e
 E4 e
 C4 e
 G3 e
-# G
 G4 e
 B4 e
 D5 e
@@ -77,17 +134,116 @@ D5 e
 B4 e
 G4 e
 D4 e
+end
+# --- Ponte: melodia sustentada, contraste com o arpejo do tema ---
+D5 h
+F5 h
+E5 h
+G5 h
+F5 h
+A5 h
+G5 h
+B5 h
+# --- Tema A (reprise) ---
+A4 e
+C5 e
+E5 e
+A5 e
+E5 e
+C5 e
+A4 e
+E4 e
+F4 e
+A4 e
+C5 e
+F5 e
+C5 e
+A4 e
+F4 e
+C4 e
+C4 e
+E4 e
+G4 e
+C5 e
+G4 e
+E4 e
+C4 e
+G3 e
+G4 e
+B4 e
+D5 e
+G5 e
+D5 e
+B4 e
+G4 e
+D4 e
+# --- Outro: run descendente terminando na tônica ---
+E5 e
+C5 e
+A4 e
+E4 e
+C4 e
+A3 e
+. e
+. e
+A4 w
 
 voice kick noise amp=0.6
-# um "boom" nos tempos 1 e 3 de cada compasso, repetido nos 4 compassos
+# --- Intro: entra contando pro tema ---
+. w
+x q
+x q
+x q
+x q
+# --- Tema A, toca 2x ---
+repeat 16
+x q
+. q
+end
+# --- Ponte: quatro por bar, mais denso ---
+repeat 16
+x q
+end
+# --- Tema A (reprise) ---
 repeat 8
 x q
 . q
 end
+# --- Outro ---
+x q
+. q
+. q
+. q
+. w
 
 voice hihat noise amp=0.15
-# hihat na contratempo (offbeat) das colcheias, repetido nos 4 compassos
+# --- Intro ---
+. w
+repeat 8
+x e
+end
+# --- Tema A, toca 2x ---
+repeat 32
+. e
+x e
+end
+# --- Ponte ---
 repeat 16
 . e
 x e
 end
+# --- Tema A (reprise) ---
+repeat 16
+. e
+x e
+end
+# --- Outro ---
+x e
+. e
+. e
+. e
+. e
+. e
+. e
+. e
+. w

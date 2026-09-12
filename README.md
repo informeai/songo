@@ -155,7 +155,11 @@ um `.` no final pra ponteada (ex.: `q.`).
 songo song examples/racer_theme.song -p
 ```
 
-Exemplo (`examples/racer_theme.song`, um tema de corrida 8-bit original):
+Exemplo simplificado (veja o arquivo completo em
+[`examples/racer_theme.song`](examples/racer_theme.song): um tema de
+corrida 8-bit original com estrutura completa — intro construindo
+tensão, tema principal repetido 2x, ponte com progressão diferente,
+reprise do tema e outro final, 4 vozes, 32 segundos):
 
 ```
 tempo 150
