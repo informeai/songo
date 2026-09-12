@@ -1,0 +1,250 @@
+# tema original de plataforma 8-bit (composição própria) a 150 BPM,
+# tom maior, ritmo saltitante -- não é a trilha de nenhum jogo existente.
+# estrutura: intro -> tema A (2x) -> ponte -> tema A (reprise) -> outro
+tempo 150
+
+voice bass triangle amp=0.6
+# --- Intro: baixo sozinho, construindo pra entrada do tema ---
+C3 w
+G2 w
+# --- Tema A (C-F-G-C), padrão "oom" saltitante, toca 2x ---
+repeat 2
+C3 e
+. e
+C3 e
+. e
+G3 e
+. e
+C3 e
+. e
+F2 e
+. e
+F2 e
+. e
+C3 e
+. e
+F2 e
+. e
+G2 e
+. e
+G2 e
+. e
+D3 e
+. e
+G2 e
+. e
+C3 e
+. e
+C3 e
+. e
+G3 e
+. e
+C3 e
+. e
+end
+# --- Ponte (Am-F-Dm-G), sustentada, contraste em tom menor ---
+A2 q
+E3 q
+A2 q
+E3 q
+F2 q
+C3 q
+F2 q
+C3 q
+D3 q
+A3 q
+D3 q
+A3 q
+G2 q
+D3 q
+G2 q
+D3 q
+# --- Tema A (reprise) ---
+C3 e
+. e
+C3 e
+. e
+G3 e
+. e
+C3 e
+. e
+F2 e
+. e
+F2 e
+. e
+C3 e
+. e
+F2 e
+. e
+G2 e
+. e
+G2 e
+. e
+D3 e
+. e
+G2 e
+. e
+C3 e
+. e
+C3 e
+. e
+G3 e
+. e
+C3 e
+. e
+# --- Outro: resolução final ---
+C3 h
+G3 h
+C3 w
+
+voice lead square duty=0.25 amp=0.3
+# --- Intro: silêncio, baixo constrói sozinho ---
+. w
+. w
+# --- Tema A, arpejo saltitante, toca 2x ---
+repeat 2
+C5 e
+E5 e
+G5 e
+C6 e
+G5 e
+E5 e
+C5 e
+. e
+F4 e
+A4 e
+C5 e
+F5 e
+C5 e
+A4 e
+F4 e
+. e
+G4 e
+B4 e
+D5 e
+G5 e
+D5 e
+B4 e
+G4 e
+. e
+C5 e
+E5 e
+G5 e
+C6 e
+G5 e
+E5 e
+C5 e
+. e
+end
+# --- Ponte: melodia sustentada em tom menor ---
+A4 h
+C5 h
+F4 h
+A4 h
+D5 h
+F5 h
+G4 h
+B4 h
+# --- Tema A (reprise) ---
+C5 e
+E5 e
+G5 e
+C6 e
+G5 e
+E5 e
+C5 e
+. e
+F4 e
+A4 e
+C5 e
+F5 e
+C5 e
+A4 e
+F4 e
+. e
+G4 e
+B4 e
+D5 e
+G5 e
+D5 e
+B4 e
+G4 e
+. e
+C5 e
+E5 e
+G5 e
+C6 e
+G5 e
+E5 e
+C5 e
+. e
+# --- Outro: run descendente resolvendo na tônica ---
+G5 e
+E5 e
+C5 e
+G4 e
+E4 e
+C4 e
+. e
+. e
+C5 w
+
+voice kick noise amp=0.6
+# --- Intro: entra contando pro tema ---
+. w
+x q
+x q
+x q
+x q
+# --- Tema A, toca 2x ---
+repeat 16
+x q
+. q
+end
+# --- Ponte: quatro por bar ---
+repeat 16
+x q
+end
+# --- Tema A (reprise) ---
+repeat 8
+x q
+. q
+end
+# --- Outro ---
+x q
+. q
+. q
+. q
+. w
+
+voice hihat noise amp=0.15
+# --- Intro ---
+. w
+repeat 8
+x e
+end
+# --- Tema A, toca 2x ---
+repeat 32
+. e
+x e
+end
+# --- Ponte ---
+repeat 16
+. e
+x e
+end
+# --- Tema A (reprise) ---
+repeat 16
+. e
+x e
+end
+# --- Outro ---
+x e
+. e
+. e
+. e
+. e
+. e
+. e
+. e
+. w

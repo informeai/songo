@@ -158,11 +158,14 @@ um `.` no final pra ponteada (ex.: `q.`).
 songo song examples/racer_theme.song -p
 ```
 
-Exemplo simplificado (veja o arquivo completo em
-[`examples/racer_theme.song`](examples/racer_theme.song): um tema de
-corrida 8-bit original com estrutura completa — intro construindo
-tensão, tema principal repetido 2x, ponte com progressão diferente,
-reprise do tema e outro final, 4 vozes, 32 segundos):
+Exemplo simplificado (veja os arquivos completos em
+[`examples/racer_theme.song`](examples/racer_theme.song) — tema de
+corrida, tom menor, baixo pulsante — e
+[`examples/platformer_theme.song`](examples/platformer_theme.song) —
+tema de plataforma, tom maior, ritmo saltitante. Ambos são composições
+originais com a mesma estrutura completa: intro construindo tensão,
+tema principal repetido 2x, ponte com progressão diferente, reprise do
+tema e outro final, 4 vozes, 32 segundos):
 
 ```
 tempo 150
