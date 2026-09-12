@@ -44,6 +44,9 @@ songo all -p
 
 # gera a partir de um script da DSL própria do songo (veja a seção abaixo)
 songo run examples/coin.sfx -p
+
+# gera uma composição com múltiplas vozes (veja a seção "Composição")
+songo song examples/racer_theme.song -p
 ```
 
 ## Presets disponíveis
@@ -138,6 +141,50 @@ Mais exemplos em [`examples/`](examples/), incluindo `pluck.sfx`,
 reverb), `power_chord.sfx` (distortion + tremolo + normalize) e
 `reverse_cymbal.sfx`.
 
+## Composição: músicas com múltiplas vozes (arquivos `.song`)
+
+Enquanto `.sfx` descreve um efeito sonoro único, `.song` descreve uma
+composição inteira: várias vozes (baixo, lead, bateria...) tocando em
+paralelo, cada uma com seu instrumento e sua sequência de notas. As notas
+usam notação científica (`A4`, `C#5`, `Eb3`) ou `.`/`x` pra pausa/pancada
+(em vozes de `noise`, sem altura definida), com duração em `w` (semibreve),
+`h` (mínima), `q` (semínima), `e` (colcheia) ou `s` (semicolcheia) — some
+um `.` no final pra ponteada (ex.: `q.`).
+
+```sh
+songo song examples/racer_theme.song -p
+```
+
+Exemplo (`examples/racer_theme.song`, um tema de corrida 8-bit original):
+
+```
+tempo 150
+
+voice bass triangle amp=0.6
+A2 e
+E3 e
+
+voice lead square duty=0.25 amp=0.3
+A4 e
+C5 e
+
+voice kick noise amp=0.6
+x q
+. q
+```
+
+Instrumentos disponíveis pra `voice`: `square` (flag `duty`), `triangle`,
+`sine`, `sawtooth`, `pluck`, `fm` (flags `mod_ratio`, `mod_index`) e
+`noise` (percussão, sem altura). Todas as vozes são mixadas e o resultado
+é normalizado automaticamente (headroom de 0.9) pra não estourar quando
+várias vozes tocam ao mesmo tempo.
+
+> Por que uma DSL de composição em vez de recriar trilhas de jogos
+> existentes: transcrever nota por nota a trilha de um jogo específico
+> reproduziria uma composição protegida por direitos autorais. O songo
+> te dá as ferramentas (sequenciador + instrumentos 8-bit) pra compor
+> algo original no mesmo estilo.
+
 ## Estrutura do projeto
 
 ```
@@ -145,8 +192,9 @@ songo/
 ├── synth/     # motor de síntese reutilizável (ondas, envelope ADSR,
 │              # filtros, delay, bitcrush, FM, escrita de WAV)
 ├── presets/   # receitas prontas de efeitos sonoros em cima do synth
-├── script/    # interpretador da DSL declarativa (.sfx)
-├── examples/  # scripts .sfx de exemplo
+├── script/    # interpretador da DSL declarativa de efeitos (.sfx)
+├── song/      # interpretador da DSL de composição multi-voz (.song)
+├── examples/  # scripts .sfx e .song de exemplo
 └── cmd/songo/ # CLI
 ```
 

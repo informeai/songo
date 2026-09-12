@@ -1,0 +1,133 @@
+# tema original de corrida 8-bit (composição própria, não é trilha de
+# nenhum jogo existente): progressão Am - F - C - G a 150 BPM
+tempo 150
+
+voice bass triangle amp=0.6
+# Am
+A2 e
+E3 e
+A2 e
+E3 e
+A2 e
+E3 e
+A2 e
+E3 e
+# F
+F2 e
+C3 e
+F2 e
+C3 e
+F2 e
+C3 e
+F2 e
+C3 e
+# C
+C3 e
+G3 e
+C3 e
+G3 e
+C3 e
+G3 e
+C3 e
+G3 e
+# G
+G2 e
+D3 e
+G2 e
+D3 e
+G2 e
+D3 e
+G2 e
+D3 e
+
+voice lead square duty=0.25 amp=0.3
+# Am
+A4 e
+C5 e
+E5 e
+A5 e
+E5 e
+C5 e
+A4 e
+E4 e
+# F
+F4 e
+A4 e
+C5 e
+F5 e
+C5 e
+A4 e
+F4 e
+C4 e
+# C
+C4 e
+E4 e
+G4 e
+C5 e
+G4 e
+E4 e
+C4 e
+G3 e
+# G
+G4 e
+B4 e
+D5 e
+G5 e
+D5 e
+B4 e
+G4 e
+D4 e
+
+voice kick noise amp=0.6
+# um "boom" nos tempos 1 e 3 de cada compasso, repetido nos 4 compassos
+x q
+. q
+x q
+. q
+x q
+. q
+x q
+. q
+x q
+. q
+x q
+. q
+x q
+. q
+x q
+. q
+
+voice hihat noise amp=0.15
+# hihat na contratempo (offbeat) das colcheias, repetido nos 4 compassos
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e
+. e
+x e

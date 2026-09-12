@@ -10,6 +10,7 @@ import (
 
 	"github.com/informeai/songo/presets"
 	"github.com/informeai/songo/script"
+	"github.com/informeai/songo/song"
 	"github.com/informeai/songo/synth"
 )
 
@@ -21,6 +22,7 @@ Uso:
   songo generate <preset> [-o arq] [-p]  gera um preset (padrão: <preset>.wav)
   songo all [-o dir] [-p]                gera todos os presets (padrão: ./sounds)
   songo run <script.sfx> [-o arq] [-p]   interpreta um script da DSL do songo
+  songo song <musica.song> [-o arq] [-p] interpreta uma composição com múltiplas vozes
 
 Flags:
   -o <caminho>   caminho de saída (arquivo em generate/run, diretório em all)
@@ -37,7 +39,25 @@ Exemplo:
   square 1319 0.15 duty=0.5 amp=0.4
   envelope 0.001 0.02 0.6 0.05
 
-Veja mais exemplos em examples/*.sfx.`)
+Veja mais exemplos em examples/*.sfx.
+
+DSL de composição (arquivos .song): múltiplas vozes, cada uma com um
+instrumento (square, triangle, sine, sawtooth, pluck, fm, noise) e uma
+sequência de notas em notação científica (A4, C#5, Eb3...) ou "." pra
+pausa, com duração em w/h/q/e/s (semibreve/mínima/semínima/colcheia/
+semicolcheia, "." opcional pra ponteada). Exemplo:
+
+  tempo 150
+
+  voice bass triangle
+  A2 e
+  E3 e
+
+  voice lead square duty=0.25
+  A4 e
+  C5 e
+
+Veja examples/*.song.`)
 }
 
 // parseFlags extrai "-o <valor>" e "-p"/"--play" de uma lista de argumentos,
@@ -142,6 +162,35 @@ func main() {
 		}
 		if err := synth.WriteWAV(out, samples); err != nil {
 			fmt.Fprintln(os.Stderr, "erro ao gerar som:", err)
+			os.Exit(1)
+		}
+		fmt.Println("gerado:", out)
+		if play {
+			playOrWarn(out)
+		}
+
+	case "song":
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "uso: songo song <musica.song> [-o arquivo.wav] [-p]")
+			os.Exit(1)
+		}
+		songPath := os.Args[2]
+		defaultOut := strings.TrimSuffix(filepath.Base(songPath), filepath.Ext(songPath)) + ".wav"
+		out, play := parseFlags(os.Args[3:], defaultOut)
+
+		f, err := os.Open(songPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao abrir música:", err)
+			os.Exit(1)
+		}
+		samples, err := song.Run(f)
+		f.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "erro na música:", err)
+			os.Exit(1)
+		}
+		if err := synth.WriteWAV(out, samples); err != nil {
+			fmt.Fprintln(os.Stderr, "erro ao gerar áudio:", err)
 			os.Exit(1)
 		}
 		fmt.Println("gerado:", out)
