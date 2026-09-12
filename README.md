@@ -65,10 +65,12 @@ songo run examples/coin.sfx -p
 
 Além dos presets prontos, o songo interpreta uma linguagem declarativa
 própria: um arquivo de texto com uma instrução por linha. **Geradores**
-(`square`, `triangle`, `noise`, `sweep`, `fm`) concatenam trechos de áudio
-ao buffer; **processadores** (`envelope`, `lowpass`, `sweep_filter`,
-`delay`, `bitcrush`) transformam o buffer inteiro já gerado até ali.
-Linhas em branco e começando com `#` são ignoradas.
+(`square`, `triangle`, `noise`, `sweep`, `fm`, `sine`, `sawtooth`, `pluck`)
+concatenam trechos de áudio ao buffer; **processadores** (`envelope`,
+`lowpass`, `sweep_filter`, `delay`, `bitcrush`, `highpass`, `resonant`,
+`distortion`, `reverb`, `vibrato`, `tremolo`, `gain`, `normalize`,
+`reverse`) transformam o buffer inteiro já gerado até ali. Linhas em
+branco e começando com `#` são ignoradas.
 
 ```sh
 # gera a partir de um script .sfx (salva como <nome-do-script>.wav)
@@ -99,20 +101,42 @@ delay 0.08 0.4 3
 
 ### Comandos da DSL
 
-| Comando        | Argumentos posicionais                  | Flags (com padrão)     | Tipo       |
-|----------------|------------------------------------------|-------------------------|------------|
-| `square`       | `freq dur`                                | `duty=0.5` `amp=1.0`    | gerador    |
-| `triangle`     | `freq dur`                                | `amp=1.0`               | gerador    |
-| `noise`        | `dur`                                     | `amp=1.0`               | gerador    |
-| `sweep`        | `freqInicial freqFinal dur`               | `duty=0.5` `amp=1.0`    | gerador    |
-| `fm`           | `freqCarrier freqModulador indiceMod dur` | `amp=1.0`               | gerador    |
-| `envelope`     | `attack decay sustain release`            | —                       | processador |
-| `lowpass`      | `cutoffHz`                                | —                       | processador |
-| `sweep_filter` | `cutoffInicial cutoffFinal`               | —                       | processador |
-| `delay`        | `delaySegundos feedback repeticoes`       | —                       | processador |
-| `bitcrush`     | `bits downsample`                         | —                       | processador |
+**Geradores** (concatenam áudio ao buffer):
 
-Mais exemplos em [`examples/`](examples/).
+| Comando    | Argumentos posicionais                    | Flags (com padrão) | Descrição                                    |
+|------------|--------------------------------------------|----------------------|-----------------------------------------------|
+| `square`   | `freq dur`                                  | `duty=0.5` `amp=1.0` | Onda quadrada clássica de console 8-bit        |
+| `triangle` | `freq dur`                                  | `amp=1.0`            | Onda triangular (grave, tipo baixo do NES)     |
+| `noise`    | `dur`                                       | `amp=1.0`            | Ruído branco                                   |
+| `sweep`    | `freqInicial freqFinal dur`                 | `duty=0.5` `amp=1.0` | Onda quadrada com frequência variando no tempo |
+| `fm`       | `freqCarrier freqModulador indiceMod dur`   | `amp=1.0`            | FM synthesis (sinos, timbres metálicos)        |
+| `sine`     | `freq dur`                                  | `amp=1.0`            | Tom puro (oscilador senoidal)                  |
+| `sawtooth` | `freq dur`                                  | `amp=1.0`            | Dente de serra, rica em harmônicos             |
+| `pluck`    | `freq dur`                                  | `amp=1.0`            | Corda dedilhada (Karplus-Strong)               |
+
+**Processadores** (transformam o buffer inteiro já gerado):
+
+| Comando        | Argumentos posicionais              | Flags (com padrão) | Descrição                                          |
+|----------------|---------------------------------------|----------------------|------------------------------------------------------|
+| `envelope`     | `attack decay sustain release`        | —                    | ADSR                                                  |
+| `lowpass`      | `cutoffHz`                            | —                    | Filtro passa-baixa                                    |
+| `sweep_filter` | `cutoffInicial cutoffFinal`           | —                    | Passa-baixa com cutoff variando no tempo ("wobble")   |
+| `delay`        | `delaySegundos feedback repeticoes`   | —                    | Eco                                                   |
+| `bitcrush`     | `bits downsample`                     | —                    | Redução de resolução, timbre lo-fi                    |
+| `highpass`     | `cutoffHz`                            | —                    | Filtro passa-alta                                     |
+| `resonant`     | `cutoffHz q`                          | —                    | Passa-baixa ressonante (state-variable), "uivo" analógico |
+| `distortion`   | `drive`                               | —                    | Saturação/overdrive (tanh)                            |
+| `reverb`       | `mix` (0 a 1)                         | —                    | Reverberação estilo Schroeder                         |
+| `vibrato`      | `rateHz depthMs`                      | —                    | Modulação de pitch (LFO)                              |
+| `tremolo`      | `rateHz depth` (depth 0 a 1)          | —                    | Modulação de volume (LFO)                             |
+| `gain`         | `factor`                              | —                    | Multiplica a amplitude                                |
+| `normalize`    | —                                      | `level=1.0`          | Escala o pico pra `level`                             |
+| `reverse`      | —                                      | —                    | Inverte o áudio (toca de trás pra frente)             |
+
+Mais exemplos em [`examples/`](examples/), incluindo `pluck.sfx`,
+`synth_lead.sfx` (sawtooth + resonant), `haunted_bell.sfx` (vibrato +
+reverb), `power_chord.sfx` (distortion + tremolo + normalize) e
+`reverse_cymbal.sfx`.
 
 ## Estrutura do projeto
 

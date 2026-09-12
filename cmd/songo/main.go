@@ -26,9 +26,11 @@ Flags:
   -o <caminho>   caminho de saída (arquivo em generate/run, diretório em all)
   -p, --play     toca cada som logo após gerá-lo
 
-DSL (arquivos .sfx): uma instrução por linha. Geradores (square, triangle,
-noise, sweep, fm) concatenam trechos de áudio; processadores (envelope,
-lowpass, sweep_filter, delay, bitcrush) transformam o áudio já gerado.
+DSL (arquivos .sfx): uma instrução por linha.
+Geradores: square, triangle, noise, sweep, fm, sine, sawtooth, pluck.
+Processadores: envelope, lowpass, sweep_filter, delay, bitcrush,
+highpass, resonant, distortion, reverb, vibrato, tremolo, gain,
+normalize, reverse.
 Exemplo:
 
   square 988 0.05 duty=0.5 amp=0.4

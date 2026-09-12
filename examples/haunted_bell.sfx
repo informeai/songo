@@ -1,0 +1,5 @@
+# sino com vibrato, reverb e cauda invertida no final
+sine 660 1.0 amp=0.5
+envelope 0.001 0.1 0.4 0.8
+vibrato 6 3
+reverb 0.4

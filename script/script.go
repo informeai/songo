@@ -114,6 +114,39 @@ func execLine(buf []float64, line string) ([]float64, error) {
 		}
 		return append(buf, synth.FM(p[0], p[1], p[2], p[3], amp)...), nil
 
+	case "sine":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		amp, err := kvFloat(kv, "amp", 1.0)
+		if err != nil {
+			return nil, err
+		}
+		return append(buf, synth.Sine(p[0], p[1], amp)...), nil
+
+	case "sawtooth":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		amp, err := kvFloat(kv, "amp", 1.0)
+		if err != nil {
+			return nil, err
+		}
+		return append(buf, synth.Sawtooth(p[0], p[1], amp)...), nil
+
+	case "pluck":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		amp, err := kvFloat(kv, "amp", 1.0)
+		if err != nil {
+			return nil, err
+		}
+		return append(buf, synth.Pluck(p[0], p[1], amp)...), nil
+
 	case "envelope":
 		p, err := floats(pos, 4, cmd)
 		if err != nil {
@@ -164,6 +197,98 @@ func execLine(buf []float64, line string) ([]float64, error) {
 			return nil, err
 		}
 		return synth.Bitcrush(buf, int(p[0]), int(p[1])), nil
+
+	case "highpass":
+		p, err := floats(pos, 1, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.HighPass(buf, p[0]), nil
+
+	case "resonant":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Resonant(buf, p[0], p[1]), nil
+
+	case "distortion":
+		p, err := floats(pos, 1, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Distortion(buf, p[0]), nil
+
+	case "reverb":
+		p, err := floats(pos, 1, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Reverb(buf, p[0]), nil
+
+	case "vibrato":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Vibrato(buf, p[0], p[1]), nil
+
+	case "tremolo":
+		p, err := floats(pos, 2, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Tremolo(buf, p[0], p[1]), nil
+
+	case "gain":
+		p, err := floats(pos, 1, cmd)
+		if err != nil {
+			return nil, err
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Gain(buf, p[0]), nil
+
+	case "normalize":
+		if len(pos) != 0 {
+			return nil, fmt.Errorf("%s: não aceita argumentos posicionais (use level=0.9)", cmd)
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		level, err := kvFloat(kv, "level", 1.0)
+		if err != nil {
+			return nil, err
+		}
+		return synth.Normalize(buf, level), nil
+
+	case "reverse":
+		if len(pos) != 0 {
+			return nil, fmt.Errorf("%s: não aceita argumentos", cmd)
+		}
+		if err := requireBuffer(buf, cmd); err != nil {
+			return nil, err
+		}
+		return synth.Reverse(buf), nil
 
 	default:
 		return nil, fmt.Errorf("comando desconhecido: %s", cmd)

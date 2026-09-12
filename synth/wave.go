@@ -81,6 +81,52 @@ func FM(carrierFreq, modFreq, modIndex, duration, amp float64) []float64 {
 	return out
 }
 
+// Sine gera um tom puro (oscilador senoidal), base de toda síntese aditiva/FM.
+func Sine(freq, duration, amp float64) []float64 {
+	n := int(duration * SampleRate)
+	out := make([]float64, n)
+	for i := range out {
+		t := float64(i) / SampleRate
+		out[i] = amp * math.Sin(2*math.Pi*freq*t)
+	}
+	return out
+}
+
+// Sawtooth gera uma onda dente de serra (rica em harmônicos, timbre mais
+// "áspero" que a quadrada/triangular).
+func Sawtooth(freq, duration, amp float64) []float64 {
+	n := int(duration * SampleRate)
+	out := make([]float64, n)
+	for i := range out {
+		phase := math.Mod(float64(i)*freq/SampleRate, 1)
+		out[i] = amp * (2*phase - 1)
+	}
+	return out
+}
+
+// Pluck sintetiza uma corda dedilhada via algoritmo de Karplus-Strong:
+// um buffer circular começa com ruído e vai sendo suavizado/decaído a
+// cada volta, simulando a corda perdendo energia com o tempo.
+func Pluck(freq, duration, amp float64) []float64 {
+	n := int(duration * SampleRate)
+	length := max(int(SampleRate/freq), 2)
+	ring := make([]float64, length)
+	for i := range ring {
+		ring[i] = amp * (rand.Float64()*2 - 1)
+	}
+	out := make([]float64, n)
+	idx := 0
+	prev := ring[length-1]
+	for i := range out {
+		cur := ring[idx]
+		out[i] = cur
+		ring[idx] = 0.5 * (cur + prev) * 0.996 // média + leve decaimento
+		prev = cur
+		idx = (idx + 1) % length
+	}
+	return out
+}
+
 // Concat junta vários trechos de amostras em sequência.
 func Concat(parts ...[]float64) []float64 {
 	var out []float64

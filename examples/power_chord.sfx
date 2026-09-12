@@ -1,0 +1,6 @@
+# riff distorcido tipo 8-bit "metal", com tremolo e normalizado no final
+sawtooth 110 0.8 amp=0.5
+distortion 6
+tremolo 8 0.3
+highpass 80
+normalize level=0.9
